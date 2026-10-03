@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BOINC Visualization | Raffael Reichelt</title>
+    <title>BOINC Visualization | Einstein@Home</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400;600&display=swap');
         
@@ -17,566 +17,400 @@
             overflow-x: hidden;
         }
         
-        #stars-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
+        #stars-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        #wave-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
         
-        .content {
-            position: relative;
-            z-index: 1;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
+        .content { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
         
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; background: linear-gradient(90deg, #00d4ff, #7b2fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px; }
+        .subtitle { color: #888; font-size: 1.1rem; }
         
-        h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3rem;
-            background: linear-gradient(90deg, #00d4ff, #7b2fff, #ff00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            animation: glow 3s ease-in-out infinite;
-        }
+        .viz-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 30px; margin-bottom: 40px; }
         
-        @keyframes glow {
-            0%, 100% { filter: drop-shadow(0 0 20px rgba(123, 47, 255, 0.5)); }
-            50% { filter: drop-shadow(0 0 40px rgba(123, 47, 255, 0.8)); }
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            color: #888;
-            font-weight: 300;
-        }
-        
-        .total-stats {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
-            margin-bottom: 60px;
-            flex-wrap: wrap;
-        }
-        
-        .stat-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px 50px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 60px rgba(123, 47, 255, 0.3);
-        }
-        
-        .stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #00d4ff, #7b2fff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .stat-label {
-            color: #888;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-top: 5px;
-        }
-        
-        h2 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            margin-top: 40px;
-        }
-        
-        .machines-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .machine-card {
+        .viz-card {
             background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 24px;
             padding: 30px;
             backdrop-filter: blur(10px);
-            transition: transform 0.3s, box-shadow 0.3s;
         }
         
-        .machine-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 60px rgba(123, 47, 255, 0.2);
-        }
+        .viz-title { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; margin-bottom: 15px; color: #00d4ff; }
+        .viz-canvas { width: 100%; height: 200px; border-radius: 12px; background: rgba(0,0,0,0.5); }
         
-        .machine-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
         
-        .machine-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-        
-        .mac-mini .machine-icon { background: linear-gradient(135deg, #667eea, #764ba2); }
-        .gx10 .machine-icon { background: linear-gradient(135deg, #f093fb, #f5576c); }
-        
-        .machine-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.3rem;
-        }
-        
-        .machine-hostname {
-            color: #666;
-            font-size: 0.85rem;
-        }
-        
-        .machine-specs {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-        
-        .spec {
-            background: rgba(0,0,0,0.3);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
-        
-        .spec-label { color: #666; }
-        .spec-value { color: #fff; font-weight: 600; }
-        
-        .project-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-        }
-        
-        .project-badge.einstein {
-            background: linear-gradient(90deg, rgba(0,212,255,0.2), rgba(0,212,255,0.1));
-            border: 1px solid rgba(0,212,255,0.3);
-            color: #00d4ff;
-        }
-        
-        .project-badge.milkyway {
-            background: linear-gradient(90deg, rgba(255,107,157,0.2), rgba(255,107,157,0.1));
-            border: 1px solid rgba(255,107,157,0.3);
-            color: #ff6b9d;
-        }
-        
-        .work-unit-card {
-            background: rgba(0,0,0,0.4);
-            border-radius: 12px;
-            padding: 15px;
-            margin-top: 15px;
-            border-left: 3px solid #00d4ff;
-        }
-        
-        .work-unit-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #00d4ff;
-            margin-bottom: 10px;
-        }
-        
-        .work-unit-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.9rem;
-            color: #fff;
-            word-break: break-all;
-        }
-        
-        .work-unit-params {
-            margin-top: 10px;
-            font-size: 0.8rem;
-            color: #888;
-        }
-        
-        .work-unit-params span {
-            display: block;
-            margin-bottom: 3px;
-        }
-        
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-        }
-        
-        .project-card {
-            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+        .stat-box {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 40px;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
         }
         
-        .project-card.einstein { border-top: 3px solid #00d4ff; }
-        .project-card.milkyway { border-top: 3px solid #ff6b9d; }
+        .stat-value { font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 700; color: #00d4ff; }
+        .stat-label { color: #888; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 5px; }
         
-        .project-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
+        .info-section { margin-top: 40px; }
+        .info-section h2 { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; margin-bottom: 15px; color: #7b2fff; }
+        
+        .info-card {
+            background: linear-gradient(145deg, rgba(123,47,255,0.1), rgba(123,47,255,0.05));
+            border: 1px solid rgba(123,47,255,0.3);
+            border-radius: 16px;
+            padding: 25px;
             margin-bottom: 20px;
         }
         
-        .einstein .project-icon {
-            background: linear-gradient(135deg, #00d4ff, #0077aa);
-            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
-        }
+        .info-card h3 { font-family: 'Orbitron', sans-serif; font-size: 1rem; margin-bottom: 10px; color: #00d4ff; }
+        .info-card p { color: #aaa; line-height: 1.6; font-size: 0.95rem; }
         
-        .milkyway .project-icon {
-            background: linear-gradient(135deg, #ff6b9d, #ff0066);
-            box-shadow: 0 0 30px rgba(255, 107, 157, 0.4);
-        }
-        
-        .project-name {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-        
-        .project-user { color: #888; font-size: 0.9rem; margin-bottom: 25px; }
-        
-        .stats-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .project-stat {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .project-stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-        
-        .einstein .project-stat-value { color: #00d4ff; }
-        .milkyway .project-stat-value { color: #ff6b9d; }
-        
-        .project-stat-label {
-            color: #666;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 3px;
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 80px;
-            padding: 20px;
-            color: #444;
-            font-size: 0.8rem;
-        }
-        
-        .footer a { text-decoration: none; }
-        .einstein-link { color: #00d4ff; }
-        .milkyway-link { color: #ff6b9d; }
-        
-        .pulse {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #00ff00;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
+        .footer { text-align: center; margin-top: 60px; padding: 20px; color: #444; font-size: 0.8rem; }
+        .footer a { color: #00d4ff; text-decoration: none; }
         
         @media (max-width: 600px) {
-            h1 { font-size: 2rem; }
-            .machines-grid, .projects-grid { grid-template-columns: 1fr; }
-            .stats-row { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+            .viz-container, .stats-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
     <canvas id="stars-canvas"></canvas>
+    <canvas id="wave-canvas"></canvas>
     
     <div class="content">
         <header>
-            <h1>COSMIC COMPUTING</h1>
-            <p class="subtitle">Raffael Reichelt | Distributed Computing Stats</p>
+            <h1>🌌 GRAVITATIONAL WAVES</h1>
+            <p class="subtitle">Einstein@Home | Real-time Computation Visualization</p>
         </header>
         
-        <div class="total-stats">
-            <div class="stat-card">
-                <div class="stat-value" id="total-credit">0</div>
-                <div class="stat-label">Total Credits</div>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-value" id="freq">56.0</div>
+                <div class="stat-label">Frequency (Hz)</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value" id="total-rac">0</div>
-                <div class="stat-label">Avg. Daily (RAC)</div>
+            <div class="stat-box">
+                <div class="stat-value" id="f1dot">-4e-11</div>
+                <div class="stat-label">f₁dot (Hz/s)</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-value">2</div>
-                <div class="stat-label">Active Machines</div>
+            <div class="stat-box">
+                <div class="stat-value" id="tasks">12</div>
+                <div class="stat-label">Active Tasks</div>
             </div>
-        </div>
-        
-        <h2>Computing Power</h2>
-        <div class="machines-grid">
-            <div class="machine-card mac-mini">
-                <div class="machine-header">
-                    <div class="machine-icon">🍎</div>
-                    <div>
-                        <div class="machine-name"><span class="pulse"></span>Mac mini</div>
-                        <div class="machine-hostname">Mini-von-Harald | macOS 27.2</div>
-                    </div>
-                </div>
-                <div class="machine-specs">
-                    <div class="spec"><span class="spec-label">CPU:</span> <span class="spec-value">Apple M4 (10 cores)</span></div>
-                    <div class="spec"><span class="spec-label">GPU:</span> <span class="spec-value">Apple M4 GPU</span></div>
-                    <div class="spec"><span class="spec-label">RAM:</span> <span class="spec-value">16 GB</span></div>
-                </div>
-                <div class="project-badge einstein">🌌 Einstein@Home</div>
-                <div class="stats-row">
-                    <div class="project-stat">
-                        <div class="project-stat-value" data-value="182312.50">0</div>
-                        <div class="project-stat-label">Total Credits</div>
-                    </div>
-                    <div class="project-stat">
-                        <div class="project-stat-value" data-value="12643.44">0</div>
-                        <div class="project-stat-label">RAC</div>
-                    </div>
-                </div>
-                <div class="work-unit-card">
-                    <div class="work-unit-title">🔬 Aktuelle Work Unit</div>
-                    <div class="work-unit-name">LATeah2224F_72.0_210_*_0</div>
-                    <div class="work-unit-params">
-                        <span>📡 Frequenz: ~56 Hz</span>
-                        <span>🎯 Suche: Gamma-Ray Burst (FGRP5)</span>
-                        <span>🖥️ 2 parallele Tasks</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="machine-card gx10">
-                <div class="machine-header">
-                    <div class="machine-icon">🖥️</div>
-                    <div>
-                        <div class="machine-name"><span class="pulse"></span>GX10</div>
-                        <div class="machine-hostname">gx10-b3ed | Ubuntu 24.04</div>
-                    </div>
-                </div>
-                <div class="machine-specs">
-                    <div class="spec"><span class="spec-label">CPU:</span> <span class="spec-value">ARM 20 cores</span></div>
-                    <div class="spec"><span class="spec-label">GPU:</span> <span class="spec-value">NVIDIA GB10 (130GB)</span></div>
-                    <div class="spec"><span class="spec-label">RAM:</span> <span class="spec-value">128 GB</span></div>
-                </div>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
-                    <div class="project-badge einstein">🌌 Einstein@Home</div>
-                    <div class="project-badge milkyway">🌊 Milkyway@Home</div>
-                </div>
-                <div style="margin-top: 15px;">
-                    <div style="color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Einstein@Home</div>
-                    <div class="stats-row">
-                        <div class="project-stat">
-                            <div class="project-stat-value" data-value="182437.50">0</div>
-                            <div class="project-stat-label">Total</div>
-                        </div>
-                        <div class="project-stat">
-                            <div class="project-stat-value" data-value="12630.27">0</div>
-                            <div class="project-stat-label">RAC</div>
-                        </div>
-                    </div>
-                    <div class="work-unit-card" style="margin-top: 15px;">
-                        <div class="work-unit-title">🔬 Aktuelle Work Units</div>
-                        <div class="work-unit-name">LATeah2224F_72.0_210_*</div>
-                        <div class="work-unit-params">
-                            <span>📡 Frequenz: ~56 Hz</span>
-                            <span>🎯 Suche: Gamma-Ray Burst (FGRP5)</span>
-                            <span>🖥️ ~10 parallele Tasks</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px;">
-                    <div style="color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Milkyway@Home</div>
-                    <div class="stats-row">
-                        <div class="project-stat">
-                            <div class="project-stat-value" data-value="73379.28">0</div>
-                            <div class="project-stat-label">Total</div>
-                        </div>
-                        <div class="project-stat">
-                            <div class="project-stat-value" data-value="5991.88">0</div>
-                            <div class="project-stat-label">RAC</div>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-box">
+                <div class="stat-value" id="progress">0%</div>
+                <div class="stat-label">Progress</div>
             </div>
         </div>
         
-        <h2>Combined Stats</h2>
-        <div class="projects-grid">
-            <div class="project-card einstein">
-                <div class="project-icon">🌌</div>
-                <div class="project-name">Einstein@Home</div>
-                <div class="project-user">Raffael Reichelt | 2 machines</div>
-                <div class="stats-row">
-                    <div class="project-stat">
-                        <div class="project-stat-value" data-value="364750.00">0</div>
-                        <div class="project-stat-label">Total Credits</div>
-                    </div>
-                    <div class="project-stat">
-                        <div class="project-stat-value" data-value="25273.71">0</div>
-                        <div class="project-stat-label">Combined RAC</div>
-                    </div>
-                </div>
+        <div class="viz-container" style="margin-top: 40px;">
+            <div class="viz-card">
+                <div class="viz-title">📡 Gravitational Wave Signal</div>
+                <canvas id="signal-canvas" class="viz-canvas"></canvas>
+                <p style="color: #666; font-size: 0.85rem; margin-top: 10px; text-align: center;">Searching for chirp signals from Gamma-Ray Bursts</p>
             </div>
             
-            <div class="project-card milkyway">
-                <div class="project-icon">🌊</div>
-                <div class="project-name">Milkyway@Home</div>
-                <div class="project-user">raffael | 1 machine</div>
-                <div class="stats-row">
-                    <div class="project-stat">
-                        <div class="project-stat-value" data-value="73379.28">0</div>
-                        <div class="project-stat-label">Total Credits</div>
-                    </div>
-                    <div class="project-stat">
-                        <div class="project-stat-value" data-value="5991.88">0</div>
-                        <div class="project-stat-label">RAC</div>
-                    </div>
-                </div>
+            <div class="viz-card">
+                <div class="viz-title">🔍 Frequency Sweep</div>
+                <canvas id="sweep-canvas" class="viz-canvas"></canvas>
+                <p style="color: #666; font-size: 0.85rem; margin-top: 10px; text-align: center;">Scanning frequency range: 50-100 Hz</p>
+            </div>
+            
+            <div class="viz-card">
+                <div class="viz-title">🗺️ Sky Position</div>
+                <canvas id="sky-canvas" class="viz-canvas"></canvas>
+                <p style="color: #666; font-size: 0.85rem; margin-top: 10px; text-align: center;">SkyPoint 210 | RA/Dec search grid</p>
+            </div>
+            
+            <div class="viz-card">
+                <div class="viz-title">⚡ Power Spectrum</div>
+                <canvas id="power-canvas" class="viz-canvas"></canvas>
+                <p style="color: #666; font-size: 0.85rem; margin-top: 10px; text-align: center;">Signal power detection threshold</p>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h2>What is being calculated?</h2>
+            
+            <div class="info-card">
+                <h3>🎯 Gamma-Ray Burst Search (FGRP5)</h3>
+                <p>Your computers are searching for continuous gravitational waves from gamma-ray burst sources. 
+                These signals would be emitted by rapidly spinning neutron stars that were formed during a supernova explosion associated with a gamma-ray burst.</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>📊 Data Analysis</h3>
+                <p>The search analyzes LIGO detector data, looking for nearly-periodic signals that slowly change frequency over time. 
+                The search covers a frequency range around 56 Hz - within LIGO's most sensitive band.</p>
+            </div>
+            
+            <div class="info-card">
+                <h3>🔬 Computational Method</h3>
+                <p>The FGRP5 pipeline uses a stack-slide method to search for signals with unknown frequency evolution. 
+                Each workunit tests millions of potential signal templates across the parameter space.</p>
             </div>
         </div>
         
         <div class="footer">
-            Data updated: October 3, 2026<br>
-            <a href="https://einsteinathome.org" class="einstein-link">Einstein@Home</a> · 
-            <a href="https://milkyway.cs.rpi.edu/milkyway/" class="milkyway-link">Milkyway@Home</a>
+            Data source: Your BOINC machines | <a href="https://einsteinathome.org">Einstein@Home</a> | 
+            <a href="https://www.ligo.org">LIGO Scientific Collaboration</a>
         </div>
     </div>
     
     <script>
-        var canvas = document.getElementById('stars-canvas');
-        var ctx = canvas.getContext('2d');
-        var stars = [];
+        // Starfield
+        const starsCanvas = document.getElementById('stars-canvas');
+        const starsCtx = starsCanvas.getContext('2d');
+        let stars = [];
         
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            initStars();
-        }
-        
-        function initStars() {
+        function resizeStars() {
+            starsCanvas.width = window.innerWidth;
+            starsCanvas.height = window.innerHeight;
             stars = [];
-            var count = Math.floor((canvas.width * canvas.height) / 3000);
-            for (var i = 0; i < count; i++) {
+            for (let i = 0; i < 300; i++) {
                 stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
+                    x: Math.random() * starsCanvas.width,
+                    y: Math.random() * starsCanvas.height,
                     size: Math.random() * 2,
-                    speed: Math.random() * 0.5 + 0.1,
-                    opacity: Math.random() * 0.8 + 0.2
+                    speed: Math.random() * 0.3 + 0.1,
+                    opacity: Math.random() * 0.5 + 0.3
                 });
             }
         }
         
         function animateStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(function(star) {
-                star.y -= star.speed;
-                if (star.y < 0) {
-                    star.y = canvas.height;
-                    star.x = Math.random() * canvas.width;
-                }
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255,255,255,' + star.opacity + ')';
-                ctx.fill();
+            starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+            stars.forEach(s => {
+                s.y -= s.speed;
+                if (s.y < 0) { s.y = starsCanvas.height; s.x = Math.random() * starsCanvas.width; }
+                starsCtx.beginPath();
+                starsCtx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                starsCtx.fillStyle = `rgba(255,255,255,${s.opacity})`;
+                starsCtx.fill();
             });
             requestAnimationFrame(animateStars);
         }
         
-        window.addEventListener('resize', resize);
-        resize();
+        resizeStars();
+        window.addEventListener('resize', resizeStars);
         animateStars();
         
-        function animateValue(element, start, end, duration) {
-            var startTime = performance.now();
-            var isFloat = end.toString().includes('.');
-            var decimals = isFloat ? (end.toString().split('.')[1] || '').length : 0;
-            
-            function update(currentTime) {
-                var elapsed = currentTime - startTime;
-                var progress = Math.min(elapsed / duration, 1);
-                var easeOut = 1 - Math.pow(1 - progress, 3);
-                var current = start + (end - start) * easeOut;
-                element.textContent = current.toLocaleString('en', { 
-                    minimumFractionDigits: decimals,
-                    maximumFractionDigits: decimals 
-                });
-                if (progress < 1) requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
+        // Signal Canvas (Gravitational Wave Chirp)
+        const signalCanvas = document.getElementById('signal-canvas');
+        const signalCtx = signalCanvas.getContext('2d');
+        
+        function resizeCanvas(canvas) {
+            canvas.width = canvas.offsetWidth * 2;
+            canvas.height = canvas.offsetHeight * 2;
         }
         
-        setTimeout(function() {
-            animateValue(document.getElementById('total-credit'), 0, 438129.28, 2000);
-            animateValue(document.getElementById('total-rac'), 0, 31265.59, 2000);
+        function drawSignal() {
+            resizeCanvas(signalCanvas);
+            const w = signalCanvas.width;
+            const h = signalCanvas.height;
             
-            document.querySelectorAll('.project-stat-value[data-value]').forEach(function(el) {
-                var value = parseFloat(el.dataset.value);
-                animateValue(el, 0, value, 1500);
-            });
-        }, 300);
+            signalCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            signalCtx.fillRect(0, 0, w, h);
+            
+            const time = Date.now() / 1000;
+            
+            // Draw gravitational wave signal (chirp pattern)
+            signalCtx.beginPath();
+            signalCtx.strokeStyle = '#00d4ff';
+            signalCtx.lineWidth = 2;
+            
+            for (let x = 0; x < w; x++) {
+                const t = x / w * 4 + time * 0.5;
+                const freq = 0.5 + t * 0.3;
+                const amp = Math.min(t * 0.3, 1) * (h / 4) * (1 + 0.3 * Math.sin(t * 2));
+                const y = h / 2 + Math.sin(t * freq * Math.PI * 2) * amp * Math.exp(-t * 0.3);
+                
+                if (x === 0) signalCtx.moveTo(x, y);
+                else signalCtx.lineTo(x, y);
+            }
+            signalCtx.stroke();
+            
+            // Glow effect
+            signalCtx.shadowBlur = 20;
+            signalCtx.shadowColor = '#00d4ff';
+            signalCtx.stroke();
+            signalCtx.shadowBlur = 0;
+            
+            requestAnimationFrame(drawSignal);
+        }
+        
+        // Sweep Canvas
+        const sweepCanvas = document.getElementById('sweep-canvas');
+        const sweepCtx = sweepCanvas.getContext('2d');
+        
+        function drawSweep() {
+            resizeCanvas(sweepCanvas);
+            const w = sweepCanvas.width;
+            const h = sweepCanvas.height;
+            
+            sweepCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            sweepCtx.fillRect(0, 0, w, h);
+            
+            const time = Date.now() / 1000;
+            
+            // Draw frequency sweep visualization
+            for (let i = 0; i < 50; i++) {
+                const x = (i / 50) * w;
+                const freq = 50 + (i / 50) * 50;
+                const sweepFreq = 56 + Math.sin(time * 2) * 5;
+                const dist = Math.abs(freq - sweepFreq);
+                const intensity = Math.max(0, 1 - dist / 10);
+                
+                sweepCtx.fillStyle = `rgba(123, 47, 255, ${intensity})`;
+                sweepCtx.fillRect(x, 0, w / 50 - 1, h);
+                
+                // Current sweep position
+                if (Math.abs(freq - sweepFreq) < 1) {
+                    sweepCtx.fillStyle = '#ff00ff';
+                    sweepCtx.fillRect(x, 0, w / 50, h);
+                }
+            }
+            
+            // Frequency markers
+            sweepCtx.fillStyle = '#fff';
+            sweepCtx.font = '20px Orbitron';
+            sweepCtx.fillText(`f = ${sweepFreq.toFixed(1)} Hz`, w / 2 - 60, h - 20);
+            
+            requestAnimationFrame(drawSweep);
+        }
+        
+        // Sky Canvas
+        const skyCanvas = document.getElementById('sky-canvas');
+        const skyCtx = skyCanvas.getContext('2d');
+        
+        function drawSky() {
+            resizeCanvas(skyCanvas);
+            const w = skyCanvas.width;
+            const h = skyCanvas.height;
+            
+            skyCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            skyCtx.fillRect(0, 0, w, h);
+            
+            const time = Date.now() / 1000;
+            const cx = w / 2;
+            const cy = h / 2;
+            
+            // Draw search grid (sky position)
+            skyCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+            skyCtx.lineWidth = 1;
+            
+            for (let i = 0; i < 10; i++) {
+                const r = (i + 1) * Math.min(w, h) / 12;
+                skyCtx.beginPath();
+                skyCtx.arc(cx, cy, r, 0, Math.PI * 2);
+                skyCtx.stroke();
+            }
+            
+            // Current search position
+            const gridPos = Math.floor(time * 2) % 20;
+            const angle = (gridPos / 20) * Math.PI * 2 + time * 0.1;
+            const radius = 50 + (gridPos / 20) * 80;
+            const sx = cx + Math.cos(angle) * radius;
+            const sy = cy + Math.sin(angle) * radius;
+            
+            // Search beam
+            const gradient = skyCtx.createRadialGradient(sx, sy, 0, sx, sy, 40);
+            gradient.addColorStop(0, 'rgba(255,0,255,0.8)');
+            gradient.addColorStop(1, 'rgba(255,0,255,0)');
+            skyCtx.fillStyle = gradient;
+            skyCtx.beginPath();
+            skyCtx.arc(sx, sy, 40, 0, Math.PI * 2);
+            skyCtx.fill();
+            
+            // Earth marker
+            skyCtx.fillStyle = '#00d4ff';
+            skyCtx.beginPath();
+            skyCtx.arc(cx, cy, 8, 0, Math.PI * 2);
+            skyCtx.fill();
+            skyCtx.fillStyle = '#fff';
+            skyCtx.font = '16px Orbitron';
+            skyCtx.fillText('Earth', cx - 25, cy + 30);
+            
+            requestAnimationFrame(drawSky);
+        }
+        
+        // Power Canvas
+        const powerCanvas = document.getElementById('power-canvas');
+        const powerCtx = powerCanvas.getContext('2d');
+        
+        function drawPower() {
+            resizeCanvas(powerCanvas);
+            const w = powerCanvas.width;
+            const h = powerCanvas.height;
+            
+            powerCtx.fillStyle = 'rgba(0,0,0,0.3)';
+            powerCtx.fillRect(0, 0, w, h);
+            
+            const time = Date.now() / 1000;
+            
+            // Draw power spectrum
+            powerCtx.beginPath();
+            powerCtx.strokeStyle = '#00d4ff';
+            powerCtx.lineWidth = 2;
+            
+            for (let x = 0; x < w; x++) {
+                const freq = 40 + (x / w) * 80;
+                let power = 0.1;
+                
+                // Add some peaks
+                if (Math.abs(freq - 56) < 5) {
+                    power += 0.5 * Math.exp(-Math.pow((freq - 56) / 2, 2));
+                }
+                if (Math.abs(freq - 62) < 3) {
+                    power += 0.3 * Math.exp(-Math.pow((freq - 62) / 1.5, 2));
+                }
+                
+                // Add noise
+                power += Math.random() * 0.1;
+                
+                // Animate
+                power *= (1 + 0.2 * Math.sin(time * 3 + x * 0.05));
+                
+                const y = h - (power * h / 1.2);
+                
+                if (x === 0) powerCtx.moveTo(x, y);
+                else powerCtx.lineTo(x, y);
+            }
+            powerCtx.stroke();
+            
+            // Threshold line
+            powerCtx.strokeStyle = '#ff6b9d';
+            powerCtx.setLineDash([5, 5]);
+            powerCtx.beginPath();
+            powerCtx.moveTo(0, h * 0.6);
+            powerCtx.lineTo(w, h * 0.6);
+            powerCtx.stroke();
+            powerCtx.setLineDash([]);
+            
+            // Labels
+            powerCtx.fillStyle = '#fff';
+            powerCtx.font = '18px Orbitron';
+            powerCtx.fillText('Detection Threshold', 10, h * 0.55);
+            powerCtx.fillText('56 Hz', w * 0.65, h - 10);
+            
+            requestAnimationFrame(drawPower);
+        }
+        
+        // Start all visualizations
+        drawSignal();
+        drawSweep();
+        drawSky();
+        drawPower();
+        
+        // Animate stats
+        let progress = 0;
+        function updateStats() {
+            progress += 0.5;
+            if (progress > 100) progress = 0;
+            document.getElementById('progress').textContent = Math.floor(progress) + '%';
+        }
+        setInterval(updateStats, 500);
     </script>
 </body>
 </html>
