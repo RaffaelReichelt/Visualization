@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOINC Visualization | Raffael Reichelt</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400;600&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        
+        #stars-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            background: linear-gradient(90deg, #00d4ff, #7b2fff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: glow 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 20px rgba(123, 47, 255, 0.5)); }
+            50% { filter: drop-shadow(0 0 40px rgba(123, 47, 255, 0.8)); }
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #888;
+            font-weight: 300;
+        }
+        
+        .total-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px 50px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(123, 47, 255, 0.3);
+        }
+        
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #7b2fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            color: #888;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+        
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+        
+        .project-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .project-card.einstein {
+            border-top: 3px solid #00d4ff;
+        }
+        
+        .project-card.milkyway {
+            border-top: 3px solid #ff6b9d;
+        }
+        
+        .project-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        
+        .einstein .project-icon {
+            background: linear-gradient(135deg, #00d4ff, #0077aa);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+        
+        .milkyway .project-icon {
+            background: linear-gradient(135deg, #ff6b9d, #ff0066);
+            box-shadow: 0 0 30px rgba(255, 107, 157, 0.4);
+        }
+        
+        .project-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+        }
+        
+        .project-user {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        
+        .project-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .project-stat {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .project-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        .einstein .project-stat-value { color: #00d4ff; }
+        .milkyway .project-stat-value { color: #ff6b9d; }
+        
+        .project-stat-label {
+            color: #666;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+        
+        .einstein .progress-fill {
+            background: linear-gradient(90deg, #00d4ff, #7b2fff);
+        }
+        
+        .milkyway .progress-fill {
+            background: linear-gradient(90deg, #ff6b9d, #ff0066);
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.8rem;
+        }
+        
+        .machine-info {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .machine-detail {
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        
+        .machine-detail span {
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding: 20px;
+            color: #444;
+            font-size: 0.8rem;
+        }
+        
+        .footer a {
+            text-decoration: none;
+        }
+        
+        .einstein-link { color: #00d4ff; }
+        .milkyway-link { color: #ff6b9d; }
+        
+        @media (max-width: 600px) {
+            h1 { font-size: 2rem; }
+            .stat-card { padding: 20px 30px; }
+            .stat-value { font-size: 1.8rem; }
+            .projects-grid { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="stars-canvas"></canvas>
+    
+    <div class="content">
+        <header>
+            <h1>COSMIC COMPUTING</h1>
+            <p class="subtitle">Raffael Reichelt | Distributed Computing Stats</p>
+        </header>
+        
+        <div class="total-stats">
+            <div class="stat-card">
+                <div class="stat-value" id="total-credit">0</div>
+                <div class="stat-label">Total Credits</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="total-rac">0</div>
+                <div class="stat-label">Avg. Daily (RAC)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">1</div>
+                <div class="stat-label">Active Machines</div>
+            </div>
+        </div>
+        
+        <div class="projects-grid">
+            <div class="project-card einstein">
+                <div class="project-header">
+                    <div class="project-icon">🌌</div>
+                    <div>
+                        <div class="project-name">Einstein@Home</div>
+                        <div class="project-user">Raffael Reichelt</div>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="project-stat">
+                        <div class="project-stat-value" data-value="182437.50">0</div>
+                        <div class="project-stat-label">Total Credits</div>
+                    </div>
+                    <div class="project-stat">
+                        <div class="project-stat-value" data-value="12630.27">0</div>
+                        <div class="project-stat-label">RAC</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%" data-target="70"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Progress to next rank</span>
+                    <span class="milestone">Rank ~500,000</span>
+                </div>
+                <div class="machine-info">
+                    <div class="machine-detail">OS: <span>Ubuntu 24.04</span></div>
+                    <div class="machine-detail">GPU: <span>NVIDIA GB10</span></div>
+                    <div class="machine-detail">CPUs: <span>20 cores</span></div>
+                </div>
+            </div>
+            
+            <div class="project-card milkyway">
+                <div class="project-header">
+                    <div class="project-icon">🌊</div>
+                    <div>
+                        <div class="project-name">Milkyway@Home</div>
+                        <div class="project-user">raffael</div>
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <div class="project-stat">
+                        <div class="project-stat-value" data-value="73379.28">0</div>
+                        <div class="project-stat-label">Total Credits</div>
+                    </div>
+                    <div class="project-stat">
+                        <div class="project-stat-value" data-value="5991.88">0</div>
+                        <div class="project-stat-label">RAC</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%" data-target="45"></div>
+                </div>
+                <div class="progress-label">
+                    <span>Progress to next rank</span>
+                    <span class="milestone">Rank ~400,000</span>
+                </div>
+                <div class="machine-info">
+                    <div class="machine-detail">OS: <span>Ubuntu 24.04</span></div>
+                    <div class="machine-detail">GPU: <span>NVIDIA GB10</span></div>
+                    <div class="machine-detail">CPUs: <span>20 cores</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Data updated: October 3, 2026 | GX10 @ gx10-b3ed<br>
+            <a href="https://einsteinathome.org" class="einstein-link">Einstein@Home</a> · 
+            <a href="https://milkyway.cs.rpi.edu/milkyway/" class="milkyway-link">Milkyway@Home</a>
+        </div>
+    </div>
+    
+    <script>
+        // Animated starfield
+        var canvas = document.getElementById('stars-canvas');
+        var ctx = canvas.getContext('2d');
+        var stars = [];
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initStars();
+        }
+        
+        function initStars() {
+            stars = [];
+            var count = Math.floor((canvas.width * canvas.height) / 3000);
+            for (var i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.1,
+                    opacity: Math.random() * 0.8 + 0.2
+                });
+            }
+        }
+        
+        function animateStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(function(star) {
+                star.y -= star.speed;
+                if (star.y < 0) {
+                    star.y = canvas.height;
+                    star.x = Math.random() * canvas.width;
+                }
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,255,255,' + star.opacity + ')';
+                ctx.fill();
+            });
+            requestAnimationFrame(animateStars);
+        }
+        
+        window.addEventListener('resize', resize);
+        resize();
+        animateStars();
+        
+        // Animate numbers
+        function animateValue(element, start, end, duration) {
+            var startTime = performance.now();
+            var isFloat = end.toString().includes('.');
+            var decimals = isFloat ? (end.toString().split('.')[1] || '').length : 0;
+            
+            function update(currentTime) {
+                var elapsed = currentTime - startTime;
+                var progress = Math.min(elapsed / duration, 1);
+                var easeOut = 1 - Math.pow(1 - progress, 3);
+                var current = start + (end - start) * easeOut;
+                element.textContent = current.toLocaleString('en', { 
+                    minimumFractionDigits: decimals,
+                    maximumFractionDigits: decimals 
+                });
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+        
+        // Animate on load
+        setTimeout(function() {
+            animateValue(document.getElementById('total-credit'), 0, 255816.78, 2000);
+            animateValue(document.getElementById('total-rac'), 0, 18622.15, 2000);
+            
+            document.querySelectorAll('.project-stat-value[data-value]').forEach(function(el) {
+                var value = parseFloat(el.dataset.value);
+                animateValue(el, 0, value, 1500);
+            });
+            
+            document.querySelectorAll('.progress-fill[data-target]').forEach(function(el) {
+                setTimeout(function() {
+                    el.style.width = el.dataset.target + '%';
+                }, 500);
+            });
+        }, 300);
+    </script>
+</body>
+</html>

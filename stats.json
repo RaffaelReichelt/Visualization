@@ -1,0 +1,38 @@
+{
+  "last_updated": "2026-10-03T13:37:00Z",
+  "machines": [
+    {
+      "name": "GX10",
+      "hostname": "gx10-b3ed",
+      "os": "Ubuntu 24.04 LTS",
+      "gpu": "NVIDIA GB10 (130GB RAM)",
+      "cpu": "ARM 20 cores",
+      "projects": [
+        {
+          "name": "Einstein@Home",
+          "url": "https://einstein.phys.uwm.edu/",
+          "user": "Raffael Reichelt",
+          "user_id": 1066127,
+          "host_id": 13282224,
+          "total_credit": 182437.50,
+          "rac": 12630.27,
+          "joined": "2026-09-22"
+        },
+        {
+          "name": "Milkyway@Home",
+          "url": "http://milkyway.cs.rpi.edu/milkyway/",
+          "user": "raffael",
+          "user_id": 8032772,
+          "host_id": 1074432,
+          "total_credit": 73379.28,
+          "rac": 5991.88,
+          "joined": "2026-09-25"
+        }
+      ]
+    }
+  ],
+  "combined": {
+    "total_credit": 255816.78,
+    "total_rac": 18622.15
+  }
+}
