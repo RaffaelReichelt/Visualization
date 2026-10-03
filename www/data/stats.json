@@ -1,0 +1,59 @@
+{
+  "last_updated": "2026-10-03T15:47:00Z",
+  "machines": [
+    {
+      "name": "Mac mini",
+      "hostname": "Mini-von-Harald",
+      "os": "macOS 27.2",
+      "gpu": "Apple M4 (10-core GPU)",
+      "cpu": "Apple M4 (10 cores)",
+      "ram_gb": 16,
+      "projects": [
+        {
+          "name": "Einstein@Home",
+          "url": "https://einstein.phys.uwm.edu/",
+          "user": "Raffael Reichelt",
+          "user_id": 1066127,
+          "total_credit": 182312.50,
+          "rac": 12643.44,
+          "host_id": 13282224,
+          "joined": "2026-09-22"
+        }
+      ]
+    },
+    {
+      "name": "GX10",
+      "hostname": "gx10-b3ed",
+      "os": "Ubuntu 24.04 LTS",
+      "gpu": "NVIDIA GB10 (130GB RAM)",
+      "cpu": "ARM 20 cores",
+      "ram_gb": 128,
+      "projects": [
+        {
+          "name": "Einstein@Home",
+          "url": "https://einstein.phys.uwm.edu/",
+          "user": "Raffael Reichelt",
+          "user_id": 1066127,
+          "host_id": 13282224,
+          "total_credit": 182437.50,
+          "rac": 12630.27,
+          "joined": "2026-09-22"
+        },
+        {
+          "name": "Milkyway@Home",
+          "url": "http://milkyway.cs.rpi.edu/milkyway/",
+          "user": "raffael",
+          "user_id": 8032772,
+          "host_id": 1074432,
+          "total_credit": 73379.28,
+          "rac": 5991.88,
+          "joined": "2026-09-25"
+        }
+      ]
+    }
+  ],
+  "combined": {
+    "total_credit": 438129.28,
+    "total_rac": 31265.59
+  }
+}

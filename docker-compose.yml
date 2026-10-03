@@ -1,0 +1,44 @@
+services:
+  web:
+    image: nginx:alpine
+    container_name: boinc-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./www:/usr/share/nginx/html:ro
+      - ./stats.json:/usr/share/nginx/html/data/stats.json:ro
+    restart: unless-stopped
+
+  sync:
+    image: alpine:latest
+    container_name: boinc-sync
+    volumes:
+      - ./scripts:/scripts
+      - ./stats.json:/data/stats.json
+      - ./client_state_macmini.xml:/data/client_state_macmini.xml
+      - ./client_state_gx10.xml:/data/client_state_gx10.xml
+      - /Users/raffael/.ssh/id_ed25519:/root/.ssh/id_ed25519:ro
+    environment:
+      - MACMINI_HOST=192.168.2.54
+      - GX10_HOST=192.168.2.205
+    command: /bin/sh -c "apk add --no-cache openssh-client python3 bash && while true; do python3 /scripts/sync_stats.py; sleep 3600; done"
+    restart: unless-stopped
+    depends_on:
+      - web
+
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-boinc
+    hostname: boinc-dashboard
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY:?TS_AUTHKEY required}
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_EXTRA_ARGS=--reset --accept-dns=false
+    volumes:
+      - ./tailscale/state:/var/lib/tailscale
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    network_mode: host
+    restart: unless-stopped
