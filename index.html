@@ -102,6 +102,142 @@
             margin-top: 5px;
         }
         
+        .machines-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(600px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .machine-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .machine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(123, 47, 255, 0.2);
+        }
+        
+        .machine-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .machine-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .mac-mini .machine-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .gx10 .machine-icon {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+        
+        .machine-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+        }
+        
+        .machine-hostname {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .machine-specs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .spec {
+            background: rgba(0,0,0,0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .spec-label {
+            color: #666;
+        }
+        
+        .spec-value {
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        .projects-section {
+            margin-top: 15px;
+        }
+        
+        .project-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .project-badge.einstein {
+            background: linear-gradient(90deg, rgba(0,212,255,0.2), rgba(0,212,255,0.1));
+            border: 1px solid rgba(0,212,255,0.3);
+            color: #00d4ff;
+        }
+        
+        .project-badge.milkyway {
+            background: linear-gradient(90deg, rgba(255,107,157,0.2), rgba(255,107,157,0.1));
+            border: 1px solid rgba(255,107,157,0.3);
+            color: #ff6b9d;
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .project-stat {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .project-stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        
+        .einstein .project-stat-value { color: #00d4ff; }
+        .milkyway .project-stat-value { color: #ff6b9d; }
+        
+        .project-stat-label {
+            color: #666;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+        
         .projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -139,6 +275,7 @@
             align-items: center;
             justify-content: center;
             font-size: 2rem;
+            margin-bottom: 20px;
         }
         
         .einstein .project-icon {
@@ -154,99 +291,13 @@
         .project-name {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.5rem;
+            margin-bottom: 5px;
         }
         
         .project-user {
             color: #888;
             font-size: 0.9rem;
-        }
-        
-        .project-header {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stats-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
             margin-bottom: 25px;
-        }
-        
-        .project-stat {
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .project-stat-value {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-        
-        .einstein .project-stat-value { color: #00d4ff; }
-        .milkyway .project-stat-value { color: #ff6b9d; }
-        
-        .project-stat-label {
-            color: #666;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 5px;
-        }
-        
-        .progress-bar {
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 1s ease-out;
-        }
-        
-        .einstein .progress-fill {
-            background: linear-gradient(90deg, #00d4ff, #7b2fff);
-        }
-        
-        .milkyway .progress-fill {
-            background: linear-gradient(90deg, #ff6b9d, #ff0066);
-        }
-        
-        .progress-label {
-            display: flex;
-            justify-content: space-between;
-            color: #666;
-            font-size: 0.8rem;
-        }
-        
-        .machine-info {
-            background: rgba(0,0,0,0.4);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        
-        .machine-detail {
-            font-size: 0.85rem;
-            color: #aaa;
-        }
-        
-        .machine-detail span {
-            color: #fff;
-            font-weight: 600;
         }
         
         .footer {
@@ -268,7 +319,7 @@
             h1 { font-size: 2rem; }
             .stat-card { padding: 20px 30px; }
             .stat-value { font-size: 1.8rem; }
-            .projects-grid { grid-template-columns: 1fr; }
+            .machines-grid, .projects-grid { grid-template-columns: 1fr; }
             .stats-row { grid-template-columns: 1fr; }
         }
     </style>
@@ -292,52 +343,111 @@
                 <div class="stat-label">Avg. Daily (RAC)</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">1</div>
+                <div class="stat-value">2</div>
                 <div class="stat-label">Active Machines</div>
             </div>
         </div>
         
-        <div class="projects-grid">
-            <div class="project-card einstein">
-                <div class="project-header">
-                    <div class="project-icon">🌌</div>
+        <h2 style="margin-bottom: 20px; font-family: Orbitron; font-size: 1.5rem;">Computing Power</h2>
+        <div class="machines-grid">
+            <div class="machine-card mac-mini">
+                <div class="machine-header">
+                    <div class="machine-icon">🍎</div>
                     <div>
-                        <div class="project-name">Einstein@Home</div>
-                        <div class="project-user">Raffael Reichelt</div>
+                        <div class="machine-name">Mac mini</div>
+                        <div class="machine-hostname">Mini-von-Harald | macOS 27.2</div>
                     </div>
                 </div>
+                <div class="machine-specs">
+                    <div class="spec"><span class="spec-label">CPU:</span> <span class="spec-value">Apple M4 (10 cores)</span></div>
+                    <div class="spec"><span class="spec-label">GPU:</span> <span class="spec-value">Apple M4 GPU</span></div>
+                    <div class="spec"><span class="spec-label">RAM:</span> <span class="spec-value">16 GB</span></div>
+                </div>
+                <div class="projects-section">
+                    <div class="project-badge einstein">🌌 Einstein@Home</div>
+                    <div class="stats-row">
+                        <div class="project-stat einstein">
+                            <div class="project-stat-value" data-value="182312.50">0</div>
+                            <div class="project-stat-label">Total Credits</div>
+                        </div>
+                        <div class="project-stat einstein">
+                            <div class="project-stat-value" data-value="12643.44">0</div>
+                            <div class="project-stat-label">RAC</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="machine-card gx10">
+                <div class="machine-header">
+                    <div class="machine-icon">🖥️</div>
+                    <div>
+                        <div class="machine-name">GX10</div>
+                        <div class="machine-hostname">gx10-b3ed | Ubuntu 24.04</div>
+                    </div>
+                </div>
+                <div class="machine-specs">
+                    <div class="spec"><span class="spec-label">CPU:</span> <span class="spec-value">ARM 20 cores</span></div>
+                    <div class="spec"><span class="spec-label">GPU:</span> <span class="spec-value">NVIDIA GB10</span></div>
+                    <div class="spec"><span class="spec-label">RAM:</span> <span class="spec-value">128 GB</span></div>
+                </div>
+                <div class="projects-section">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <div class="project-badge einstein">🌌 Einstein@Home</div>
+                        <div class="project-badge milkyway">🌊 Milkyway@Home</div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <div style="color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Einstein@Home</div>
+                        <div class="stats-row">
+                            <div class="project-stat einstein">
+                                <div class="project-stat-value" data-value="182437.50">0</div>
+                                <div class="project-stat-label">Total</div>
+                            </div>
+                            <div class="project-stat einstein">
+                                <div class="project-stat-value" data-value="12630.27">0</div>
+                                <div class="project-stat-label">RAC</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <div style="color: #666; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Milkyway@Home</div>
+                        <div class="stats-row">
+                            <div class="project-stat milkyway">
+                                <div class="project-stat-value" data-value="73379.28">0</div>
+                                <div class="project-stat-label">Total</div>
+                            </div>
+                            <div class="project-stat milkyway">
+                                <div class="project-stat-value" data-value="5991.88">0</div>
+                                <div class="project-stat-label">RAC</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h2 style="margin-bottom: 20px; font-family: Orbitron; font-size: 1.5rem;">Combined Stats</h2>
+        <div class="projects-grid">
+            <div class="project-card einstein">
+                <div class="project-icon">🌌</div>
+                <div class="project-name">Einstein@Home</div>
+                <div class="project-user">Raffael Reichelt | 2 machines</div>
                 <div class="stats-row">
                     <div class="project-stat">
-                        <div class="project-stat-value" data-value="182437.50">0</div>
+                        <div class="project-stat-value" data-value="364750.00">0</div>
                         <div class="project-stat-label">Total Credits</div>
                     </div>
                     <div class="project-stat">
-                        <div class="project-stat-value" data-value="12630.27">0</div>
-                        <div class="project-stat-label">RAC</div>
+                        <div class="project-stat-value" data-value="25273.71">0</div>
+                        <div class="project-stat-label">Combined RAC</div>
                     </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 0%" data-target="70"></div>
-                </div>
-                <div class="progress-label">
-                    <span>Progress to next rank</span>
-                    <span class="milestone">Rank ~500,000</span>
-                </div>
-                <div class="machine-info">
-                    <div class="machine-detail">OS: <span>Ubuntu 24.04</span></div>
-                    <div class="machine-detail">GPU: <span>NVIDIA GB10</span></div>
-                    <div class="machine-detail">CPUs: <span>20 cores</span></div>
                 </div>
             </div>
             
             <div class="project-card milkyway">
-                <div class="project-header">
-                    <div class="project-icon">🌊</div>
-                    <div>
-                        <div class="project-name">Milkyway@Home</div>
-                        <div class="project-user">raffael</div>
-                    </div>
-                </div>
+                <div class="project-icon">🌊</div>
+                <div class="project-name">Milkyway@Home</div>
+                <div class="project-user">raffael | 1 machine</div>
                 <div class="stats-row">
                     <div class="project-stat">
                         <div class="project-stat-value" data-value="73379.28">0</div>
@@ -348,30 +458,17 @@
                         <div class="project-stat-label">RAC</div>
                     </div>
                 </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 0%" data-target="45"></div>
-                </div>
-                <div class="progress-label">
-                    <span>Progress to next rank</span>
-                    <span class="milestone">Rank ~400,000</span>
-                </div>
-                <div class="machine-info">
-                    <div class="machine-detail">OS: <span>Ubuntu 24.04</span></div>
-                    <div class="machine-detail">GPU: <span>NVIDIA GB10</span></div>
-                    <div class="machine-detail">CPUs: <span>20 cores</span></div>
-                </div>
             </div>
         </div>
         
         <div class="footer">
-            Data updated: October 3, 2026 | GX10 @ gx10-b3ed<br>
+            Data updated: October 3, 2026<br>
             <a href="https://einsteinathome.org" class="einstein-link">Einstein@Home</a> · 
             <a href="https://milkyway.cs.rpi.edu/milkyway/" class="milkyway-link">Milkyway@Home</a>
         </div>
     </div>
     
     <script>
-        // Animated starfield
         var canvas = document.getElementById('stars-canvas');
         var ctx = canvas.getContext('2d');
         var stars = [];
@@ -416,7 +513,6 @@
         resize();
         animateStars();
         
-        // Animate numbers
         function animateValue(element, start, end, duration) {
             var startTime = performance.now();
             var isFloat = end.toString().includes('.');
@@ -436,20 +532,13 @@
             requestAnimationFrame(update);
         }
         
-        // Animate on load
         setTimeout(function() {
-            animateValue(document.getElementById('total-credit'), 0, 255816.78, 2000);
-            animateValue(document.getElementById('total-rac'), 0, 18622.15, 2000);
+            animateValue(document.getElementById('total-credit'), 0, 438129.28, 2000);
+            animateValue(document.getElementById('total-rac'), 0, 31265.59, 2000);
             
             document.querySelectorAll('.project-stat-value[data-value]').forEach(function(el) {
                 var value = parseFloat(el.dataset.value);
                 animateValue(el, 0, value, 1500);
-            });
-            
-            document.querySelectorAll('.progress-fill[data-target]').forEach(function(el) {
-                setTimeout(function() {
-                    el.style.width = el.dataset.target + '%';
-                }, 500);
             });
         }, 300);
     </script>
